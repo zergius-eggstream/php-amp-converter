@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ZergiusEggstream\AmpConverter;
+namespace AmpConverter;
 
 /**
  * Mutable per-conversion state shared between transformers in a pipeline.

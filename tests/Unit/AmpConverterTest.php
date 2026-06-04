@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace ZergiusEggstream\AmpConverter\Tests\Unit;
+namespace AmpConverter\Tests\Unit;
 
 use ArrayObject;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use ZergiusEggstream\AmpConverter\AmpConverter;
-use ZergiusEggstream\AmpConverter\Context;
-use ZergiusEggstream\AmpConverter\Transformer;
+use AmpConverter\AmpConverter;
+use AmpConverter\Context;
+use AmpConverter\Transformer;
 
 final class AmpConverterTest extends TestCase
 {

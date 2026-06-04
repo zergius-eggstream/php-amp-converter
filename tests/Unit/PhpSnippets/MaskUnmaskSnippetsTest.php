@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace ZergiusEggstream\AmpConverter\Tests\Unit\PhpSnippets;
+namespace AmpConverter\Tests\Unit\PhpSnippets;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use ZergiusEggstream\AmpConverter\Context;
-use ZergiusEggstream\AmpConverter\PhpSnippets\MaskSnippets;
-use ZergiusEggstream\AmpConverter\PhpSnippets\UnmaskSnippets;
+use AmpConverter\Context;
+use AmpConverter\PhpSnippets\MaskSnippets;
+use AmpConverter\PhpSnippets\UnmaskSnippets;
 
 final class MaskUnmaskSnippetsTest extends TestCase
 {

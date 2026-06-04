@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace ZergiusEggstream\AmpConverter\Tests\Unit;
+namespace AmpConverter\Tests\Unit;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use ZergiusEggstream\AmpConverter\ConversionResult;
+use AmpConverter\ConversionResult;
 
 final class ConversionResultTest extends TestCase
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ZergiusEggstream\AmpConverter\PhpSnippets;
+namespace AmpConverter\PhpSnippets;
 
 /**
  * Replaces Twig/PHP snippets with alphanumeric placeholders that are valid in

@@ -25,7 +25,7 @@ composer require zergius-eggstream/amp-converter
 ### Plain PHP
 
 ```php
-use ZergiusEggstream\AmpConverter\AmpConverter;
+use AmpConverter\AmpConverter;
 
 $result = AmpConverter::createDefault()->convert($renderedHtml, $siteRoot);
 file_put_contents($outputPath, $result->html);
@@ -44,7 +44,7 @@ The package ships an optional **Symfony bridge** that auto-wires the converter i
 // config/bundles.php
 return [
     // ...
-    ZergiusEggstream\AmpConverter\Bridge\Symfony\AmpConverterBundle::class => ['all' => true],
+    AmpConverter\Bridge\Symfony\AmpConverterBundle::class => ['all' => true],
 ];
 ```
 

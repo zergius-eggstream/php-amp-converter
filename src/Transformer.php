@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ZergiusEggstream\AmpConverter;
+namespace AmpConverter;
 
 interface Transformer
 {

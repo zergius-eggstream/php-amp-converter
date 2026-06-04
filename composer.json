@@ -20,12 +20,12 @@
     },
     "autoload": {
         "psr-4": {
-            "ZergiusEggstream\\AmpConverter\\": "src/"
+            "AmpConverter\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "ZergiusEggstream\\AmpConverter\\Tests\\": "tests/"
+            "AmpConverter\\Tests\\": "tests/"
         }
     },
     "scripts": {

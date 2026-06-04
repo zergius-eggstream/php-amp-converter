@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ZergiusEggstream\AmpConverter;
+namespace AmpConverter;
 
 /**
  * Entry point. Runs an ordered list of Transformer objects over rendered HTML

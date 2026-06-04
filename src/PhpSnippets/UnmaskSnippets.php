@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace ZergiusEggstream\AmpConverter\PhpSnippets;
+namespace AmpConverter\PhpSnippets;
 
-use ZergiusEggstream\AmpConverter\Context;
-use ZergiusEggstream\AmpConverter\Transformer;
+use AmpConverter\Context;
+use AmpConverter\Transformer;
 
 /**
  * Pipeline-stage final: restore stashed Twig/PHP snippets from placeholders.

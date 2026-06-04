@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace ZergiusEggstream\AmpConverter\Tests\Unit\PhpSnippets;
+namespace AmpConverter\Tests\Unit\PhpSnippets;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use ZergiusEggstream\AmpConverter\PhpSnippets\SnippetMasker;
+use AmpConverter\PhpSnippets\SnippetMasker;
 
 final class SnippetMaskerTest extends TestCase
 {

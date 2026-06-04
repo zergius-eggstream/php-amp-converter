@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace ZergiusEggstream\AmpConverter;
+namespace AmpConverter;
 
-use ZergiusEggstream\AmpConverter\PhpSnippets\MaskSnippets;
-use ZergiusEggstream\AmpConverter\PhpSnippets\UnmaskSnippets;
+use AmpConverter\PhpSnippets\MaskSnippets;
+use AmpConverter\PhpSnippets\UnmaskSnippets;
 
 /**
  * Factory of the default transformer pipeline. Order matters: each transformer

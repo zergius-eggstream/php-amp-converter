@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace ZergiusEggstream\AmpConverter\Tests\Unit;
+namespace AmpConverter\Tests\Unit;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use ZergiusEggstream\AmpConverter\Context;
+use AmpConverter\Context;
 
 final class ContextTest extends TestCase
 {
