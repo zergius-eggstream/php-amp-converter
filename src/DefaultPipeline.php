@@ -8,6 +8,7 @@ use AmpConverter\PhpSnippets\MaskSnippets;
 use AmpConverter\PhpSnippets\UnmaskSnippets;
 use AmpConverter\Transformer\CssProcessing;
 use AmpConverter\Transformer\FontImportInjection;
+use AmpConverter\Transformer\ImgToAmpImg;
 
 /**
  * Factory of the default transformer pipeline. Order matters: each transformer
@@ -29,7 +30,7 @@ final class DefaultPipeline
             // TODO Stage 3:  Transformer/HtmlSkeleton
             // TODO Stage 3:  Transformer/ScriptStripping
             new CssProcessing(),
-            // TODO Stage 5:  Transformer/ImgToAmpImg
+            new ImgToAmpImg(),
             // TODO Stage 6:  Transformer/IframeConversion
             // TODO Stage 7:  Transformer/FormConversion
             // TODO Stage 8:  Transformer/DefensiveSourceFixes
