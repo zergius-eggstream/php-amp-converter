@@ -1,5 +1,9 @@
 # php-amp-converter
 
+[![Latest Stable Version](https://poser.pugx.org/zergius-eggstream/amp-converter/v)](https://packagist.org/packages/zergius-eggstream/amp-converter)
+[![License](https://poser.pugx.org/zergius-eggstream/amp-converter/license)](https://packagist.org/packages/zergius-eggstream/amp-converter)
+[![PHP Version Require](https://poser.pugx.org/zergius-eggstream/amp-converter/require/php)](https://packagist.org/packages/zergius-eggstream/amp-converter)
+
 Convert rendered HTML pages into AMP-valid HTML — pure PHP, no Node runtime.
 
 PHP port of the Node-based `convert-rendered-to-amp.js` shipped with the [amp-seo-sites toolset](https://github.com/zergius-eggstream/amp-seo-sites). Designed for build-time conversion of pre-rendered HTML into AMP HTML that passes the official `amphtml-validator`, with no Node runtime in the conversion path.
