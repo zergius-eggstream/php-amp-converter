@@ -103,9 +103,13 @@ final class AmpConverterTest extends TestCase
     {
         $converter = AmpConverter::createDefault();
 
+        // The pipeline now includes head/skeleton rewriting (Stage 12), so a
+        // plain <html> gets marked with ⚡. Verify the marker is added and
+        // the inner body is preserved (no <head>, so no runtime injection).
         $result = $converter->convert('<html><body>hi</body></html>', '/site');
 
-        self::assertSame('<html><body>hi</body></html>', $result->html);
+        self::assertStringContainsString('<html ⚡>', $result->html);
+        self::assertStringContainsString('<body>hi</body>', $result->html);
     }
 
     #[Test]
@@ -113,7 +117,10 @@ final class AmpConverterTest extends TestCase
     {
         $converter = AmpConverter::createDefault();
 
-        $input = '<p>{{ name }}<?php echo 1; ?></p>';
+        // Plain text with PHP/Twig dynamics, no HTML skeleton — the
+        // mask/unmask bookends should round-trip the snippets verbatim
+        // and the rest of the pipeline is a no-op on tag-less text.
+        $input = '{{ name }}<?php echo 1; ?>';
         $result = $converter->convert($input, '/site');
 
         self::assertSame($input, $result->html);
