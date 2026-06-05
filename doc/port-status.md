@@ -6,7 +6,7 @@ Tracking parity with the Node reference (`convert-rendered-to-amp.js`, v0.12, ~1
 |---|---|---|
 | 1 | Skeleton (composer, phpunit, phpstan, CI) | ✅ |
 | 2 | Foundation (`Context`, `ConversionResult`, `Transformer`, `AmpConverter`, `DefaultPipeline`, `SnippetMasker`) | ✅ |
-| 3 | `ImageSize/ImageSizeResolver` (getimagesize + SVG XML) | ⏳ |
+| 3 | `ImageSize/ImageSizeResolver` (getimagesize + SVG XML) | ✅ |
 | 4 | `Transformer/CssProcessing` (font @import → link, !important strip, @charset) | ⏳ |
 | 5 | `Transformer/ImgToAmpImg` (layout decision: fixed/intrinsic/responsive/fill) | ⏳ |
 | 6 | `Transformer/IframeConversion` (youtube → amp-youtube; other → amp-iframe) | ⏳ |
