@@ -14,7 +14,7 @@ Tracking parity with the Node reference (`convert-rendered-to-amp.js`, v0.12, ~1
 | 8 | `Transformer/DefensiveSourceFixes` (script strip, on*=, aria-roledescription, URL typos, broken `<hN>`, dup doctype/meta/html/head/body, head↔body cross-contamination, table border, rel/class dedupe, alt/loading on non-media, preload, oversized inline style) | ✅ |
 | 9 | `Transformer/BurgerToAmpBind` (3-tier detection L1+L2+L3, CSS-pair guard with 4 hidden + 5 shown patterns, applyBurgerBinding) | ✅ |
 | 10 | `Transformer/FaqToAccordion` (V1 container with FAQ marker, V2 dl/dt/dd with guard, V3 sibling schema.org Questions, V4 hN+p in FAQ-marker parent; CSS post-process: patchAccordionCss, patchFaqCssSpecificity, injectQuestionClassDefaults) | ✅ |
-| 11 | `Transformer/AutoContrastVars` (YIQ luma resolve) | ⏳ |
+| 11 | `Transformer/AutoContrastVars` (YIQ luma resolve for `--X: auto`; fallback strip when background isn't recoverable) | ✅ |
 | 12 | `Transformer/PurgeCss` + `Transformer/AmpRuntimeInjection` | ⏳ |
 | 13 | Orchestration smoke tests + corpus byte-equality regression | ⏳ |
 

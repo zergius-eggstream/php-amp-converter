@@ -9,6 +9,7 @@ use AmpConverter\PhpSnippets\UnmaskSnippets;
 use AmpConverter\Transformer\CssProcessing;
 use AmpConverter\Transformer\BurgerToAmpBind;
 use AmpConverter\Transformer\DefensiveSourceFixes;
+use AmpConverter\Transformer\AutoContrastVars;
 use AmpConverter\Transformer\FaqToAccordion;
 use AmpConverter\Transformer\FontImportInjection;
 use AmpConverter\Transformer\FormConversion;
@@ -41,7 +42,7 @@ final class DefaultPipeline
             new DefensiveSourceFixes(),
             new BurgerToAmpBind(),
             new FaqToAccordion(),
-            // TODO Stage 11: Transformer/AutoContrastVars
+            new AutoContrastVars(),
             // TODO Stage 12: Transformer/PurgeCss
             new FontImportInjection(),
             // TODO Stage 12: Transformer/AmpRuntimeInjection
