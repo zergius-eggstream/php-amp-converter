@@ -6,12 +6,12 @@ PHP port of the Node-based `convert-rendered-to-amp.js` shipped with the [amp-se
 
 ## Status
 
-🚧 **Work in progress.** Port follows the algorithm specification in [`doc/rendered-to-amp-algorithm.md`](https://github.com/zergius-eggstream/amp-seo-sites/blob/main/dist/amp-converter-v0.12/doc/rendered-to-amp-algorithm.md). Track progress in [`doc/port-status.md`](doc/port-status.md).
+**Port complete, ready for review.** All 13 algorithm stages implemented and exercised end-to-end on a real-world ~119 KB customer page (melada.kz: amp-img, amp-youtube, amp-iframe, amp-bind burger, amp-accordion FAQ, inlined external CSS, JSON-LD); PHP output sits within **0.1 % of the Node reference** (113,628 vs 113,749 bytes, structurally identical AMP). 249 phpunit tests / 501 assertions; PHPStan level 8 clean. CI runs on PHP 8.4. Stage map: [`doc/port-status.md`](doc/port-status.md).
 
 ## Requirements
 
 - PHP `>=8.4` (will be lowered if no 8.x features end up being required)
-- ext-libxml, ext-mbstring, ext-simplexml, ext-gd (for raster image dimensions; SVG uses ext-simplexml)
+- `ext-libxml`, `ext-mbstring`, `ext-simplexml`, `ext-gd` (raster image dimensions; SVG uses ext-simplexml)
 - **No Node.js** — pure PHP
 
 ## Installation
@@ -20,9 +20,9 @@ PHP port of the Node-based `convert-rendered-to-amp.js` shipped with the [amp-se
 composer require zergius-eggstream/amp-converter
 ```
 
-## Usage
+Once the maintainer of the consuming projects forks/republishes the package under their preferred vendor, that `require` line points at the new name (the namespace stays `AmpConverter\` so call sites don't change).
 
-### Plain PHP
+## Usage
 
 ```php
 use AmpConverter\AmpConverter;
@@ -34,107 +34,123 @@ foreach ($result->warnings as $w) {
 }
 ```
 
-`$siteRoot` is the absolute path to the site's `public/` directory (so the converter can resolve relative image paths to read their dimensions).
+`$siteRoot` is the absolute path to the **site directory** (the package looks for assets under `$siteRoot/public/`). Used to resolve relative image paths so dimensions can be read from disk.
 
-### Symfony
+`ConversionResult` exposes:
 
-The package ships an optional **Symfony bridge** that auto-wires the converter into your DI container.
+- `html: string` — the converted AMP HTML.
+- `usedComponents: list<string>` — AMP custom components actually emitted (`amp-img`, `amp-youtube`, `amp-iframe`, `amp-bind`, `amp-accordion`, …). The pipeline emits a `<script async custom-element="…">` for each one (except `amp-img`, which ships with v0.js).
+- `warnings: list<string>` — non-fatal issues encountered (unresolvable image, dropped CSS block, malformed tag, …). The host project decides whether to log, surface or ignore them.
 
-```php
-// config/bundles.php
-return [
-    // ...
-    AmpConverter\Bridge\Symfony\AmpConverterBundle::class => ['all' => true],
-];
-```
+### Symfony integration
 
-```yaml
-# config/packages/amp_converter.yaml  (optional)
-amp_converter:
-    redirects_tsv_path: '%kernel.project_dir%/data/cms/_data/redirects.tsv'
-```
-
-Now `AmpConverter`, `ImageSizeResolver`, and `AmpDomainResolver` (if configured) are autowired:
+The package is framework-agnostic. The seo-sites project wires it through a thin wrapper:
 
 ```php
-public function __construct(
-    private readonly AmpConverter $ampConverter,
-) {}
+// src/Renderer/AmpConverter.php  (one-line autowired service)
+namespace App\Renderer;
+
+use AmpConverter\AmpConverter as Lib;
+
+readonly class AmpConverter
+{
+    public function convert(string $renderedHtml, string $siteRoot): string
+    {
+        return Lib::createDefault()->convert($renderedHtml, $siteRoot)->html;
+    }
+}
 ```
 
-The bridge requires `symfony/http-kernel` and `symfony/dependency-injection`, listed in `composer.json` `suggest`. Without them the bridge classes simply aren't autoloaded — the core library still works.
+If a future iteration ships a Symfony Bundle for zero-config auto-wiring (`Bridge/Symfony/AmpConverterBundle`), it will be additive — the framework-agnostic core won't change.
 
 ## Architecture
 
-The converter is a **pipeline of transformers**. Each transformer implements `Transformer::apply(string $html, Context $ctx): string` and is responsible for one feature area (img conversion, iframe conversion, burger-menu detection, FAQ-to-accordion, defensive source fixes, etc.).
+The converter is an ordered **pipeline of transformers**. Each transformer implements `Transformer::apply(string $html, Context $ctx): string` and owns one feature area; `Context` carries cross-transformer state (siteRoot, used components, warnings, detected FAQ classes, font @imports collected from CSS, …).
 
 ```
 input HTML
     │
     ▼
-┌─────────────────────────┐
-│ HtmlSkeleton            │  <html ⚡>, charset, viewport
-├─────────────────────────┤
-│ ScriptStripping         │  remove inline JS, on*= handlers
-├─────────────────────────┤
-│ CssProcessing           │  font @import → link, !important strip
-├─────────────────────────┤
-│ ImgToAmpImg             │  layout decision (intrinsic/responsive/fill/fixed)
-├─────────────────────────┤
-│ IframeConversion        │  youtube → amp-youtube, others → amp-iframe
-├─────────────────────────┤
-│ FormConversion          │  form → div, submit → amp-bind
-├─────────────────────────┤
-│ DefensiveSourceFixes    │  hts:// typo, dup class, broken tags
-├─────────────────────────┤
-│ BurgerToAmpBind         │  3-tier detection, CSS-pair guard
-├─────────────────────────┤
-│ FaqToAccordion          │  schema.org, dl/dt/dd, sibling Q+A
-├─────────────────────────┤
-│ AutoContrastVars        │  resolve :auto color vars via YIQ luma
-├─────────────────────────┤
-│ PurgeCss                │  shrink <style amp-custom> below 75KB
-├─────────────────────────┤
-│ AmpRuntimeInjection     │  v0.js, boilerplate, custom-element scripts
-└─────────────────────────┘
+┌──────────────────────────┐
+│ MaskSnippets             │  preserve Twig/PHP dynamics behind opaque placeholders
+├──────────────────────────┤
+│ CssAggregation           │  inline local <link rel=stylesheet>, merge <style> blocks
+├──────────────────────────┤
+│ CssProcessing            │  HTML-entity decode, font @import extract, strip
+│                          │   !important / @import / @charset, vendor-media,
+│                          │   broken --vars
+├──────────────────────────┤
+│ ImgToAmpImg              │  <img> → <amp-img> with layout pick (fixed/intrinsic/
+│                          │   responsive/fill) + logo/avatar heuristics
+├──────────────────────────┤
+│ IframeConversion         │  YouTube → <amp-youtube>; other → <amp-iframe>
+│                          │   (responsive / fixed-height / fill); <canvas> dropped
+├──────────────────────────┤
+│ FormConversion           │  <form> → <div data-was-form>, submit → amp-bind tap
+├──────────────────────────┤
+│ DefensiveSourceFixes     │  script strip (preserves JSON-LD), on*= strip,
+│                          │   URL typos, duplicate doctype / meta / head / body,
+│                          │   table border, rel/class dedupe, alt/loading guards,
+│                          │   preload strip, oversized inline style
+├──────────────────────────┤
+│ BurgerToAmpBind          │  3-tier detection (aria-controls / class+nav /
+│                          │   nav-driven) + CSS-pair guard (5 hidden / 5 shown)
+├──────────────────────────┤
+│ FaqToAccordion           │  4 variants (container + dl + sibling Question +
+│                          │   hN+p) + CSS post-process (accordion patch,
+│                          │   specificity bump, question-class defaults)
+├──────────────────────────┤
+│ AutoContrastVars         │  resolve --X:auto via YIQ luma; fallback strip
+├──────────────────────────┤
+│ FontImportInjection      │  emit <link rel=stylesheet> for collected font CDNs
+├──────────────────────────┤
+│ AmpRuntimeInjection      │  <html ⚡>, v0.js, custom-element scripts (sorted),
+│                          │   boilerplate, canonical, http-equiv→charset,
+│                          │   noscript guard
+├──────────────────────────┤
+│ PurgeCss                 │  shrink <style amp-custom> (60 KB threshold);
+│                          │   recursive @media, @font-face/@keyframes preserved
+├──────────────────────────┤
+│ UnmaskSnippets           │  restore the dynamics from step 1
+└──────────────────────────┘
     │
     ▼
 ConversionResult { html, usedComponents, warnings }
 ```
 
-Replace the default pipeline by passing your own transformer list:
+Replace the default pipeline by constructing `AmpConverter` directly:
 
 ```php
-new AmpConverter([
-    new HtmlSkeleton(),
+use AmpConverter\AmpConverter;
+use AmpConverter\Transformer\ImgToAmpImg;
+use AmpConverter\PhpSnippets\MaskSnippets;
+use AmpConverter\PhpSnippets\UnmaskSnippets;
+
+$converter = new AmpConverter([
+    new MaskSnippets(),
+    new ImgToAmpImg(),
     new MyCustomTransformer(),
-    // ...
+    new UnmaskSnippets(),
 ]);
 ```
 
 ## Error handling
 
-Strict but graceful: when the converter cannot transform a fragment (unparseable `<img>` tag, malformed CSS block, missing image dimensions), it **removes the fragment and records a warning** rather than throwing. The whole page still converts. Build pipelines decide what to do with warnings (log / fail / ignore).
-
-`InvalidArgumentException` is reserved for programmer errors (non-existent `$siteRoot`, unreadable fixtures).
+Strict but graceful: when the converter cannot transform a fragment (unparseable `<img>` tag, malformed CSS block, missing image dimensions), it **removes the fragment and records a warning** rather than throwing. The whole page still converts. Build pipelines decide what to do with warnings (log / fail / ignore). Exceptions are reserved for unrecoverable programmer errors (e.g. invalid pipeline configuration).
 
 ## Testing
 
-- `tests/Unit/Transformer/*Test.php` — per-rule unit tests with synthetic fixtures from `tests/fixtures/unit/`.
-- `tests/Regression/CorpusByteEqualityTest.php` — byte-equality against `tests/fixtures/corpus/<site>/expected.html` (real-world sites).
-
 ```bash
-composer test
-composer phpstan
+composer test       # phpunit
+composer phpstan    # static analysis
 ```
 
-Baselines in `tests/fixtures/corpus/` are committed to the repo so CI does not need Node. To regenerate them locally (during the port, while parity with the Node reference is the goal):
+Layout:
 
-```bash
-php bin/regen-fixtures.php
-```
+- `tests/Unit/<Area>/<Class>Test.php` — per-rule unit tests for every transformer; each spec rule has its own positive + negative test.
+- `tests/Regression/MeladaKzSmokeTest.php` — end-to-end smoke test on a real customer page. Auto-skips when the sibling `seo-sites` checkout isn't present (CI just runs the unit tests).
 
-The long-term goal is full parity, after which the baseline becomes "previous PHP-converter output" — internal regression — and the Node dependency disappears entirely.
+CI is GitHub Actions over PHP 8.4 with the `libxml`, `mbstring`, `simplexml`, `gd` extensions; no Node required.
 
 ## License
 
