@@ -19,12 +19,15 @@ jobs:
           - php-version: '8.4'
             extensions: 'libxml, mbstring, simplexml, gd'
             label: 'with-gd'
-          # Slim production target: no GD. Raster-fixture-dependent tests
-          # auto-skip via markTestSkipped; the rest must still pass. This
-          # job proves the package is GD-free at runtime, which matters
-          # for low-resource servers that can't load the extension.
+          # Slim production target: no GD. The `:gd` prefix explicitly
+          # unloads the extension (otherwise shivammathur/setup-php keeps
+          # the default PHP bundle which ships with GD on Ubuntu, and
+          # tests wouldn't actually exercise the no-GD path). Raster-
+          # fixture-dependent tests auto-skip via markTestSkipped; the
+          # rest must still pass. Proves the package is GD-free at
+          # runtime, which matters for low-resource servers.
           - php-version: '8.4'
-            extensions: 'libxml, mbstring, simplexml'
+            extensions: 'libxml, mbstring, simplexml, :gd'
             label: 'no-gd'
     name: test (${{ matrix.php-version }} ${{ matrix.label }})
     steps:
