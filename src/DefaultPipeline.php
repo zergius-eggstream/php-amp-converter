@@ -8,6 +8,7 @@ use AmpConverter\PhpSnippets\MaskSnippets;
 use AmpConverter\PhpSnippets\UnmaskSnippets;
 use AmpConverter\Transformer\CssProcessing;
 use AmpConverter\Transformer\FontImportInjection;
+use AmpConverter\Transformer\FormConversion;
 use AmpConverter\Transformer\IframeConversion;
 use AmpConverter\Transformer\ImgToAmpImg;
 
@@ -33,7 +34,7 @@ final class DefaultPipeline
             new CssProcessing(),
             new ImgToAmpImg(),
             new IframeConversion(),
-            // TODO Stage 7:  Transformer/FormConversion
+            new FormConversion(),
             // TODO Stage 8:  Transformer/DefensiveSourceFixes
             // TODO Stage 9:  Transformer/BurgerToAmpBind
             // TODO Stage 10: Transformer/FaqToAccordion

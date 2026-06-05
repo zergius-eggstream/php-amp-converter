@@ -10,7 +10,7 @@ Tracking parity with the Node reference (`convert-rendered-to-amp.js`, v0.12, ~1
 | 4 | `Transformer/CssProcessing` + `Transformer/FontImportInjection` (font @import → link, !important, @charset, vendor-media, broken --vars) | ✅ |
 | 5 | `Transformer/ImgToAmpImg` (layout decision: fixed/intrinsic/responsive/fill) | ✅ |
 | 6 | `Transformer/IframeConversion` (youtube → amp-youtube; other → amp-iframe; canvas → comment) | ✅ |
-| 7 | `Transformer/FormConversion` (form → div, submit → amp-bind) | ⏳ |
+| 7 | `Transformer/FormConversion` (form → div, submit → amp-bind tap-action) | ✅ |
 | 8 | `Transformer/DefensiveSourceFixes` (25+ source-bug fixes) | ⏳ |
 | 9 | `Transformer/BurgerToAmpBind` (3-tier detection, CSS-pair guard) | ⏳ |
 | 10 | `Transformer/FaqToAccordion` (two-pass detection, sibling Q+A) | ⏳ |
