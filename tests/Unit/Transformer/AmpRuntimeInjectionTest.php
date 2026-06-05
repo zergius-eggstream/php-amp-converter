@@ -158,10 +158,51 @@ final class AmpRuntimeInjectionTest extends TestCase
     }
 
     #[Test]
-    public function existingCanonicalLinkIsLeftAlone(): void
+    public function existingCanonicalLinkIsLeftAloneWhenNoCanonicalUrlProvided(): void
     {
         $r = $this->apply('<head><meta charset="utf-8"><link rel="canonical" href="https://example.com/x"></head>');
         self::assertSame(1, substr_count($r['html'], 'rel="canonical"'));
         self::assertStringContainsString('href="https://example.com/x"', $r['html']);
+    }
+
+    // === Canonical URL override via Context ===
+
+    #[Test]
+    public function canonicalUrlOnContextIsEmittedWhenMissingInSource(): void
+    {
+        $ctx = new Context('/tmp/site', canonicalUrl: 'https://canonical.example.com/page');
+        $r = $this->apply('<head><meta charset="utf-8"></head>', $ctx);
+        self::assertStringContainsString(
+            '<link rel="canonical" href="https://canonical.example.com/page">',
+            $r['html'],
+        );
+        self::assertStringNotContainsString('href="./"', $r['html']);
+    }
+
+    #[Test]
+    public function canonicalUrlOnContextReplacesExistingCanonicalLink(): void
+    {
+        // Host's declarative intent wins: when a canonicalUrl is provided,
+        // any pre-existing canonical link in the source HTML gets replaced.
+        $ctx = new Context('/tmp/site', canonicalUrl: 'https://canonical.example.com/page');
+        $r = $this->apply(
+            '<head><meta charset="utf-8"><link rel="canonical" href="https://stale.example.com/old"></head>',
+            $ctx,
+        );
+        self::assertSame(1, substr_count($r['html'], 'rel="canonical"'));
+        self::assertStringContainsString(
+            '<link rel="canonical" href="https://canonical.example.com/page">',
+            $r['html'],
+        );
+        self::assertStringNotContainsString('stale.example.com', $r['html']);
+    }
+
+    #[Test]
+    public function nullCanonicalUrlFallsBackToRelativeSelfReference(): void
+    {
+        // Default behaviour when host doesn't provide a canonical URL.
+        $ctx = new Context('/tmp/site');
+        $r = $this->apply('<head><meta charset="utf-8"></head>', $ctx);
+        self::assertStringContainsString('<link rel="canonical" href="./">', $r['html']);
     }
 }

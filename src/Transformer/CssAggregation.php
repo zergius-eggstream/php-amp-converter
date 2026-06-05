@@ -86,7 +86,7 @@ final class CssAggregation implements Transformer
                 }
                 $seen[$href] = true;
 
-                $css = $this->readLocalCss($href, $ctx->siteRoot);
+                $css = $this->readLocalCss($href, $ctx->assetsRoot());
                 if ($css === null) {
                     $ctx->addWarning('CSS link could not be inlined: ' . $href);
 
@@ -164,14 +164,14 @@ final class CssAggregation implements Transformer
         return false;
     }
 
-    private function readLocalCss(string $href, string $siteRoot): ?string
+    private function readLocalCss(string $href, string $baseDir): ?string
     {
         $clean = explode('#', explode('?', $href)[0])[0];
         if (str_starts_with($clean, 'http://') || str_starts_with($clean, 'https://') || str_starts_with($clean, '//')) {
             return null;
         }
         $rel = ltrim($clean, '/');
-        $path = rtrim($siteRoot, '/\\') . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $rel;
+        $path = rtrim($baseDir, '/\\') . DIRECTORY_SEPARATOR . $rel;
         if (!is_file($path)) {
             return null;
         }

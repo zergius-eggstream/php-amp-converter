@@ -53,7 +53,7 @@ final class AmpRuntimeInjection implements Transformer
         $html = $this->stripNonAmpNoscript($html);
         $html = $this->injectRuntimeAndBoilerplate($html, $ctx);
 
-        return $this->injectCanonical($html);
+        return $this->injectCanonical($html, $ctx);
     }
 
     private function selfCloseOrphanLinks(string $html): string
@@ -150,18 +150,45 @@ final class AmpRuntimeInjection implements Transformer
         return '<script async custom-element="' . $name . '" src="https://cdn.ampproject.org/v0/' . $name . '-0.1.js"></script>';
     }
 
-    private function injectCanonical(string $html): string
+    /**
+     * When `$ctx->canonicalUrl` is provided, ALWAYS emit
+     * `<link rel="canonical" href="$canonicalUrl">`, replacing any pre-existing
+     * canonical link the source HTML may have carried. This is the host's
+     * declarative intent — "use this URL", and we respect it.
+     *
+     * When `$ctx->canonicalUrl` is null, fall back to the current behaviour:
+     * keep any existing canonical link as-is, and only inject a relative
+     * self-reference `href="./"` when there's no canonical at all. This keeps
+     * the package usable as a drop-in for hosts that don't want / need to
+     * compute absolute URLs at build time.
+     */
+    private function injectCanonical(string $html, Context $ctx): string
     {
-        if (preg_match('/<link\s+[^>]*\brel=["\']canonical["\']/i', $html) === 1) {
+        $href = $ctx->canonicalUrl ?? './';
+
+        $existing = preg_match('/<link\s+[^>]*\brel=["\']canonical["\'][^>]*>/i', $html) === 1;
+
+        if ($ctx->canonicalUrl !== null && $existing) {
+            // Replace existing canonical with the caller-supplied URL.
+            return (string) preg_replace(
+                '/<link\s+[^>]*\brel=["\']canonical["\'][^>]*>/i',
+                '<link rel="canonical" href="' . $href . '">',
+                $html,
+                1,
+            );
+        }
+
+        if ($existing) {
             return $html;
         }
+
         if (preg_match('#</head>#i', $html) !== 1) {
             return $html;
         }
 
         return (string) preg_replace(
             '#</head>#i',
-            "    <link rel=\"canonical\" href=\"./\">\n</head>",
+            '    <link rel="canonical" href="' . $href . "\">\n</head>",
             $html,
             1,
         );

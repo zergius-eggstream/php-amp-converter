@@ -28,7 +28,41 @@ final class Context
 
     public function __construct(
         public readonly string $siteRoot,
+        /**
+         * Absolute URL of the canonical (non-AMP) version of the page being
+         * converted. When provided, AmpRuntimeInjection emits
+         * `<link rel="canonical" href="$canonicalUrl">` and replaces any
+         * existing canonical link. When null, the injector falls back to a
+         * relative self-reference `href="./"`. Lets the host decide how to
+         * compute the URL (TSV, per-site config, request) without coupling
+         * the package to a specific source.
+         */
+        public readonly ?string $canonicalUrl = null,
+        /**
+         * Subdirectory under `$siteRoot` that holds the on-disk assets the
+         * converter reads (images for dimension resolution, local CSS files
+         * to inline). Default `public` matches the seo-sites / seo-cms-index
+         * layout; hosts with a flat layout pass an empty string, hosts with
+         * a different folder pass that folder name.
+         */
+        public readonly string $assetsBaseDir = 'public',
     ) {}
+
+    /**
+     * Absolute path where on-disk assets live for this conversion
+     * (= `$siteRoot` joined with `$assetsBaseDir`). Helper so transformers
+     * don't repeat the joining logic and so an empty `$assetsBaseDir` just
+     * collapses to `$siteRoot`.
+     */
+    public function assetsRoot(): string
+    {
+        $root = rtrim($this->siteRoot, '/\\');
+        if ($this->assetsBaseDir === '') {
+            return $root;
+        }
+
+        return $root . DIRECTORY_SEPARATOR . trim($this->assetsBaseDir, '/\\');
+    }
 
     public function markComponentUsed(string $tagName): void
     {

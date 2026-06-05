@@ -6,17 +6,23 @@ namespace AmpConverter\ImageSize;
 
 /**
  * Resolves dimensions + AMP layout for an <img src="..."> by reading the file
- * from disk under `<siteRoot>/public/`.
+ * from disk under a caller-provided `$baseDir`.
  *
  * Port of `resolveImageSize` in tools/convert-rendered-to-amp.js (~line 58).
  * Per-instance cache, no global state.
+ *
+ * The caller chooses where assets live by composing `$baseDir` themselves —
+ * typically `Context::assetsRoot()` (= siteRoot + assetsBaseDir). The
+ * resolver makes no assumption about a `public/` subdirectory: hosts with
+ * flat layouts, custom folders, or no on-disk assets at all just pass the
+ * appropriate path.
  *
  * Behaviour (no exceptions thrown — all errors become warnings + sensible
  * fallback ImageSize, per the strict-but-graceful policy):
  *
  *   - Empty / http(s) / protocol-relative src → 800×600 responsive (no warning).
  *   - Placeholder src (after SnippetMasker) → 800×600 responsive (no warning).
- *   - File not found under <siteRoot>/public/ → 800×600 responsive + warning.
+ *   - File not found under $baseDir → 800×600 responsive + warning.
  *   - .svg: explicit width/height attrs → intrinsic; else viewBox → intrinsic;
  *           else fill + warning.
  *   - raster: getimagesize() success → responsive; failure → 800×600
@@ -30,7 +36,7 @@ final class ImageSizeResolver
     /** @var array<string, ImageSize> */
     private array $cache = [];
 
-    public function resolve(string $src, string $siteRoot): ImageSize
+    public function resolve(string $src, string $baseDir): ImageSize
     {
         if ($src === '' || str_starts_with($src, 'http') || str_starts_with($src, '//')) {
             return new ImageSize(self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT, 'responsive');
@@ -43,7 +49,7 @@ final class ImageSizeResolver
         }
 
         $relative = str_starts_with($src, '/') ? substr($src, 1) : $src;
-        $imgPath = rtrim($siteRoot, '/\\') . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . $relative;
+        $imgPath = rtrim($baseDir, '/\\') . DIRECTORY_SEPARATOR . $relative;
 
         if (!is_file($imgPath)) {
             $result = new ImageSize(

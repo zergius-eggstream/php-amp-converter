@@ -82,7 +82,7 @@ final class ImgToAmpImg implements Transformer
 
         $existingW = $this->extractNumericDim($attrs, 'width');
         $existingH = $this->extractNumericDim($attrs, 'height');
-        $resolved = $this->sizes->resolve($src, $ctx->siteRoot);
+        $resolved = $this->sizes->resolve($src, $ctx->assetsRoot());
         if ($resolved->warning !== null) {
             $ctx->addWarning('<img src="' . $src . '">: ' . $resolved->warning);
         }

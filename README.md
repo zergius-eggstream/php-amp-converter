@@ -27,14 +27,27 @@ Once the maintainer of the consuming projects forks/republishes the package unde
 ```php
 use AmpConverter\AmpConverter;
 
-$result = AmpConverter::createDefault()->convert($renderedHtml, $siteRoot);
+$result = AmpConverter::createDefault()->convert(
+    $renderedHtml,
+    $siteRoot,
+    canonicalUrl: 'https://example.com/the-page',
+);
 file_put_contents($outputPath, $result->html);
 foreach ($result->warnings as $w) {
     error_log("amp-converter: $w");
 }
 ```
 
-`$siteRoot` is the absolute path to the **site directory** (the package looks for assets under `$siteRoot/public/`). Used to resolve relative image paths so dimensions can be read from disk.
+Arguments:
+
+| Name | Required | Default | Meaning |
+|---|---|---|---|
+| `$renderedHtml` | yes | — | the rendered HTML to convert |
+| `$siteRoot` | yes | — | absolute path to the site directory (root of on-disk assets) |
+| `$canonicalUrl` | no | `null` | absolute URL of the non-AMP (canonical) version of the page. When provided, AMP page emits `<link rel="canonical" href="$canonicalUrl">` and replaces any existing canonical link. When null, falls back to a relative self-reference `href="./"` so the package stays drop-in for hosts that don't compute absolute URLs at build time. |
+| `$assetsBaseDir` | no | `'public'` | subdirectory under `$siteRoot` where assets live. Default `public` matches the seo-sites / seo-cms-index layout; pass an empty string for a flat layout, or a custom folder for non-standard layouts. |
+
+The package is intentionally agnostic about **where** the host gets `canonicalUrl` from (TSV, per-site config, request data, hard-coded mapping, …) — that's a host concern. The package just emits what it was given.
 
 `ConversionResult` exposes:
 

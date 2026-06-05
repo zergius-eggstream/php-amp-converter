@@ -28,9 +28,23 @@ final readonly class AmpConverter
         return new self(DefaultPipeline::transformers());
     }
 
-    public function convert(string $renderedHtml, string $siteRoot): ConversionResult
-    {
-        $context = new Context(siteRoot: $siteRoot);
+    /**
+     * @param string      $renderedHtml   the rendered HTML to convert
+     * @param string      $siteRoot       absolute path to the site directory used to resolve on-disk assets
+     * @param string|null $canonicalUrl   absolute URL of the canonical (non-AMP) version; emitted as <link rel="canonical"> on the AMP page when provided, otherwise the package falls back to a relative self-reference (href="./")
+     * @param string      $assetsBaseDir  subdirectory under $siteRoot where assets live (defaults to `public`; pass an empty string for a flat layout, or a custom folder for non-standard layouts)
+     */
+    public function convert(
+        string $renderedHtml,
+        string $siteRoot,
+        ?string $canonicalUrl = null,
+        string $assetsBaseDir = 'public',
+    ): ConversionResult {
+        $context = new Context(
+            siteRoot: $siteRoot,
+            canonicalUrl: $canonicalUrl,
+            assetsBaseDir: $assetsBaseDir,
+        );
         $html = $renderedHtml;
 
         foreach ($this->transformers as $transformer) {
