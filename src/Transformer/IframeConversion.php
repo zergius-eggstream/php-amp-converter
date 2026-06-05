@@ -130,7 +130,7 @@ final class IframeConversion implements Transformer
             return ['responsive', ' width="' . $wNum . '" height="' . $hNum . '"'];
         }
         // Mixed: numeric height + percentage/auto/missing width → fixed-height
-        // (gaming-iframe pattern width=100% height=500; sattikrg.kz fix 2026-06-04).
+        // (common gaming/demo-iframe pattern width=100% height=500).
         // Must NOT be fill: without sized parent, fill expands to viewport.
         if ($hNum !== null && ($wIsPctOrAuto || $wRaw === null)) {
             return ['fixed-height', ' width="auto" height="' . $hNum . '"'];

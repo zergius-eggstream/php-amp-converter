@@ -1,5 +1,13 @@
 parameters:
     level: 8
+    # Newer PHPStan 2.x narrows string-array access (e.g. $css[$j]) to literal
+    # unions when the surrounding control flow constrains them. Our hand-
+    # written CSS parsers (PurgeCss / CssAggregation) rely on character-level
+    # comparisons that the narrowing flags as "always true / always false"
+    # even when the cases are exhaustively handled. Turning off the strict
+    # phpdoc-types-certain mode reverts to the more pragmatic behaviour the
+    # code was written against.
+    treatPhpDocTypesAsCertain: false
     paths:
         - src
         - tests

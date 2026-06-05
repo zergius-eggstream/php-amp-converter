@@ -41,9 +41,9 @@ final class Context
         /**
          * Subdirectory under `$siteRoot` that holds the on-disk assets the
          * converter reads (images for dimension resolution, local CSS files
-         * to inline). Default `public` matches the seo-sites / seo-cms-index
-         * layout; hosts with a flat layout pass an empty string, hosts with
-         * a different folder pass that folder name.
+         * to inline). The default matches the common `public/`-as-document-
+         * root convention; hosts with a flat layout pass an empty string,
+         * hosts with a different folder pass that folder name.
          */
         public readonly string $assetsBaseDir = 'public',
     ) {}

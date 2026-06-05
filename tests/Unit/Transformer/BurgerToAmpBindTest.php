@@ -202,8 +202,8 @@ final class BurgerToAmpBindTest extends TestCase
     #[Test]
     public function l3HamburgerSpanPatternFindsTrigger(): void
     {
-        // volnacasinokz pattern: trigger has no recognised class, BUT it
-        // contains 3 empty <span> children before the collapsible nav.
+        // Real-world hamburger-icon pattern: trigger has no recognised class,
+        // BUT it contains 3 empty <span> children before the collapsible nav.
         $css = '.mobile-nav{display:none}.mobile-nav.show{display:block}';
         $html = $this->wrapWithCss(
             $css,
@@ -218,7 +218,7 @@ final class BurgerToAmpBindTest extends TestCase
     #[Test]
     public function l3NavBeforeTriggerWorks(): void
     {
-        // Bidirectional: trigger AFTER the nav (volnacasinokz variant).
+        // Bidirectional: trigger AFTER the nav (real-world variant).
         $css = '.mobile-nav{display:none}.mobile-nav.show{display:block}';
         $html = $this->wrapWithCss(
             $css,

@@ -9,4 +9,5 @@
 *.log
 .DS_Store
 Thumbs.db
-/.melada-*.html
+/.smoke-*.html
+/.*.html

@@ -62,7 +62,7 @@ final class IframeConversionTest extends TestCase
     #[Test]
     public function percentWidthWithNumericHeightBecomesFixedHeight(): void
     {
-        // Real-world: sattikrg.kz iframe width="100%" height="500".
+        // Real-world iframe pattern: width="100%" height="500".
         $r = $this->apply('<iframe src="https://demo.example.com/" width="100%" height="500"></iframe>');
         self::assertStringContainsString('width="auto" height="500" layout="fixed-height"', $r['html']);
     }
@@ -84,7 +84,7 @@ final class IframeConversionTest extends TestCase
     #[Test]
     public function bothPercentBecomesFillWithoutDimAttrs(): void
     {
-        // melada.kz case.
+        // Common floating-iframe-in-sized-wrapper case.
         $r = $this->apply('<iframe src="https://aviator.example/" width="100%" height="100%"></iframe>');
         self::assertStringContainsString('layout="fill"', $r['html']);
         self::assertStringNotContainsString('width=', $r['html']);

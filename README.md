@@ -2,11 +2,11 @@
 
 Convert rendered HTML pages into AMP-valid HTML — pure PHP, no Node runtime.
 
-PHP port of the Node-based `convert-rendered-to-amp.js` shipped with the [amp-seo-sites toolset](https://github.com/zergius-eggstream/amp-seo-sites). Designed for build-time conversion of static-rendered HTML (Symfony / cms.exe / standalone) into AMP HTML that passes the official `amphtml-validator`.
+PHP port of the Node-based `convert-rendered-to-amp.js` shipped with the [amp-seo-sites toolset](https://github.com/zergius-eggstream/amp-seo-sites). Designed for build-time conversion of pre-rendered HTML into AMP HTML that passes the official `amphtml-validator`, with no Node runtime in the conversion path.
 
 ## Status
 
-**Port complete, ready for review.** All 13 algorithm stages implemented and exercised end-to-end on a real-world ~119 KB customer page (melada.kz: amp-img, amp-youtube, amp-iframe, amp-bind burger, amp-accordion FAQ, inlined external CSS, JSON-LD); PHP output sits within **0.1 % of the Node reference** (113,628 vs 113,749 bytes, structurally identical AMP). 249 phpunit tests / 501 assertions; PHPStan level 8 clean. CI runs on PHP 8.4. Stage map: [`doc/port-status.md`](doc/port-status.md).
+**Port complete, ready for review.** All 13 algorithm stages implemented and exercised end-to-end on a real-world ~119 KB rendered page (covering amp-img, amp-youtube, amp-iframe, amp-bind burger, amp-accordion FAQ, inlined external CSS, JSON-LD); PHP output sits within **0.1 % of the Node reference** (113.6 KB vs 113.7 KB, structurally identical AMP). 258 phpunit tests / 513 assertions; PHPStan level 8 clean. CI runs on PHP 8.4. Stage map: [`doc/port-status.md`](doc/port-status.md).
 
 ## Requirements
 
@@ -45,7 +45,7 @@ Arguments:
 | `$renderedHtml` | yes | — | the rendered HTML to convert |
 | `$siteRoot` | yes | — | absolute path to the site directory (root of on-disk assets) |
 | `$canonicalUrl` | no | `null` | absolute URL of the non-AMP (canonical) version of the page. When provided, AMP page emits `<link rel="canonical" href="$canonicalUrl">` and replaces any existing canonical link. When null, falls back to a relative self-reference `href="./"` so the package stays drop-in for hosts that don't compute absolute URLs at build time. |
-| `$assetsBaseDir` | no | `'public'` | subdirectory under `$siteRoot` where assets live. Default `public` matches the seo-sites / seo-cms-index layout; pass an empty string for a flat layout, or a custom folder for non-standard layouts. |
+| `$assetsBaseDir` | no | `'public'` | subdirectory under `$siteRoot` where assets live. The default matches the common `public/`-as-document-root convention; pass an empty string for a flat layout, or a custom folder for non-standard layouts. |
 
 The package is intentionally agnostic about **where** the host gets `canonicalUrl` from (TSV, per-site config, request data, hard-coded mapping, …) — that's a host concern. The package just emits what it was given.
 
@@ -57,10 +57,9 @@ The package is intentionally agnostic about **where** the host gets `canonicalUr
 
 ### Symfony integration
 
-The package is framework-agnostic. The seo-sites project wires it through a thin wrapper:
+The package is framework-agnostic. A typical Symfony host wires it through a thin one-line autowired service:
 
 ```php
-// src/Renderer/AmpConverter.php  (one-line autowired service)
 namespace App\Renderer;
 
 use AmpConverter\AmpConverter as Lib;
@@ -161,7 +160,7 @@ composer phpstan    # static analysis
 Layout:
 
 - `tests/Unit/<Area>/<Class>Test.php` — per-rule unit tests for every transformer; each spec rule has its own positive + negative test.
-- `tests/Regression/MeladaKzSmokeTest.php` — end-to-end smoke test on a real customer page. Auto-skips when the sibling `seo-sites` checkout isn't present (CI just runs the unit tests).
+- `tests/Regression/EndToEndSmokeTest.php` — end-to-end smoke test on a real rendered page. Reads the fixture directory from the `AMP_CONVERTER_SMOKE_FIXTURE_DIR` environment variable; auto-skips when the variable is unset or the path is missing, so CI just runs the unit tests.
 
 CI is GitHub Actions over PHP 8.4 with the `libxml`, `mbstring`, `simplexml`, `gd` extensions; no Node required.
 

@@ -11,9 +11,9 @@ use AmpConverter\Transformer;
  * Port of the <form> rewrite from tools/convert-rendered-to-amp.js
  * (~lines 1573-1593).
  *
- * We DON'T translate to amp-form: it would require a maintainer-side
- * server endpoint that the seo-sites/seo-cms-index pipelines don't
- * have. Instead the form becomes a <div data-was-form="true"> so the
+ * We DON'T translate to amp-form: it would require a host-side server
+ * endpoint that the build pipelines this package targets typically
+ * don't have. Instead the form becomes a <div data-was-form="true"> so the
  * markup survives, and any submit control gets an amp-bind tap-action
  * that sets a global `form_sent` flag — the surrounding markup can
  * react to that with [class] / [hidden] bindings if needed.

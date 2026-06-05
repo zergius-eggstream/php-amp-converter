@@ -175,7 +175,7 @@ final class ImgToAmpImgTest extends TestCase
     #[Test]
     public function avatarLikeParentClassUpgradesToIntrinsic(): void
     {
-        // Real-world: sattikrg.kz `<div class="author-photo"><img ...></div>`.
+        // Real-world avatar wrapper pattern: `<div class="author-photo"><img ...></div>`.
         $this->writeRaster('/images/face.png', 80, 80);
         $r = $this->apply(
             '<div class="author-photo"><img src="/images/face.png" alt="Ivan"></div>',
