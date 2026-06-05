@@ -110,6 +110,12 @@ final class AmpRuntimeInjection implements Transformer
         }
 
         $components = array_keys($ctx->usedComponents);
+        // amp-img is built into v0.js and must NOT get a custom-element
+        // script — emitting one is a validator error.
+        $components = array_values(array_filter(
+            $components,
+            static fn (string $c): bool => $c !== 'amp-img',
+        ));
         sort($components);
 
         $injection = "\n    " . self::RUNTIME;

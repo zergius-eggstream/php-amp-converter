@@ -115,18 +115,21 @@ final class AmpRuntimeInjectionTest extends TestCase
     {
         $ctx = new Context('/tmp/site');
         $ctx->markComponentUsed('amp-youtube');
-        $ctx->markComponentUsed('amp-img');
+        $ctx->markComponentUsed('amp-img'); // built-in into v0.js; must NOT get a script
         $ctx->markComponentUsed('amp-bind');
+        $ctx->markComponentUsed('amp-accordion');
         $r = $this->apply('<head><meta charset="utf-8"></head>', $ctx);
+        $accPos = strpos($r['html'], 'amp-accordion-0.1.js');
         $bindPos = strpos($r['html'], 'amp-bind-0.1.js');
-        $imgPos = strpos($r['html'], 'amp-img-0.1.js');
         $ytPos = strpos($r['html'], 'amp-youtube-0.1.js');
+        self::assertNotFalse($accPos);
         self::assertNotFalse($bindPos);
-        self::assertNotFalse($imgPos);
         self::assertNotFalse($ytPos);
+        // amp-img is built-in to v0.js → no separate script.
+        self::assertStringNotContainsString('amp-img-0.1.js', $r['html']);
         // Sorted alphabetically.
-        self::assertLessThan($imgPos, $bindPos);
-        self::assertLessThan($ytPos, $imgPos);
+        self::assertLessThan($bindPos, $accPos);
+        self::assertLessThan($ytPos, $bindPos);
     }
 
     #[Test]

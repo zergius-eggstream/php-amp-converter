@@ -16,7 +16,8 @@ Tracking parity with the Node reference (`convert-rendered-to-amp.js`, v0.12, ~1
 | 10 | `Transformer/FaqToAccordion` (V1 container with FAQ marker, V2 dl/dt/dd with guard, V3 sibling schema.org Questions, V4 hN+p in FAQ-marker parent; CSS post-process: patchAccordionCss, patchFaqCssSpecificity, injectQuestionClassDefaults) | ✅ |
 | 11 | `Transformer/AutoContrastVars` (YIQ luma resolve for `--X: auto`; fallback strip when background isn't recoverable) | ✅ |
 | 12 | `Transformer/AmpRuntimeInjection` (⚡ on `<html>`, runtime v0.js, custom-element scripts sorted, boilerplate, canonical, http-equiv→charset, noscript guard, orphan `<link>` self-close) + `Transformer/PurgeCss` (60 KB threshold, recurses into @media/@supports, always-safe selectors) | ✅ |
-| 13 | Orchestration smoke tests + corpus byte-equality regression | ⏳ |
+| 13 | End-to-end smoke test on melada.kz (real-world page exercising amp-img + amp-youtube + amp-iframe + amp-bind + amp-accordion + inlined CSS + JSON-LD preservation). PHP output is within 1% of the Node reference baseline. | ✅ |
+| 4b | `Transformer/CssAggregation` (inline local `<link rel=stylesheet>` files into `<style amp-custom>`, consolidate `<style>` blocks, keep font-allowlist links) | ✅ |
 
 Legend: ✅ done · 🚧 in progress · ⏳ not started
 

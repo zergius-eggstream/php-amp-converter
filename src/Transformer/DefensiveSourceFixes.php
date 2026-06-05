@@ -32,6 +32,7 @@ final class DefensiveSourceFixes implements Transformer
         $html = $this->stripInlineEventHandlers($html);
         $html = $this->stripAriaRoledescription($html);
         $html = $this->fixUrlSchemeTypos($html);
+        $html = $this->upgradeProtocolRelativeUrls($html);
         $html = $this->fixBrokenHeadingClose($html);
         $html = $this->stripDuplicateMetaCharset($html, $ctx);
         $html = $this->stripDuplicateDoctype($html, $ctx);
@@ -50,18 +51,37 @@ final class DefensiveSourceFixes implements Transformer
     }
 
     /**
-     * AMP only allows the AMP-runtime <script> with a specific type/src
-     * combo (the runtime injection stage handles those). Everything else
-     * — author scripts, async script tags, inline event-firing scripts —
-     * must go. The three sub-forms cover full <script>...</script>, the
-     * self-closing src form, and the regular src form.
+     * AMP only allows the AMP-runtime <script> (cdn.ampproject.org) and
+     * JSON-LD / inline-JSON `<script type="application/(ld+)?json">`
+     * blocks for schema.org metadata. Strip everything else — author
+     * scripts, async script tags, inline event-firing scripts.
      */
     private function stripScriptTags(string $html): string
     {
-        $html = (string) preg_replace('#<script\b[^>]*>[\s\S]*?</script>#i', '', $html);
-        $html = (string) preg_replace('#<script\b[^>]*\bsrc=[^>]*\/>#i', '', $html);
+        $keep = static function (string $attrs): bool {
+            if (str_contains($attrs, 'cdn.ampproject.org')) {
+                return true;
+            }
 
-        return (string) preg_replace('#<script\b[^>]*\bsrc=["\'][^"\']*["\'][^>]*></script>#i', '', $html);
+            return preg_match('#type=["\']application/(?:ld\+)?json["\']#i', $attrs) === 1;
+        };
+
+        $html = (string) preg_replace_callback(
+            '#<script\b([^>]*)>[\s\S]*?</script>#i',
+            static fn (array $m): string => $keep($m[1]) ? $m[0] : '',
+            $html,
+        );
+        $html = (string) preg_replace_callback(
+            '#<script\b([^>]*)\bsrc=[^>]*/>#i',
+            static fn (array $m): string => $keep($m[1]) ? $m[0] : '',
+            $html,
+        );
+
+        return (string) preg_replace_callback(
+            '#<script\b([^>]*)\bsrc=["\'][^"\']*["\'][^>]*></script>#i',
+            static fn (array $m): string => $keep($m[1]) ? $m[0] : '',
+            $html,
+        );
     }
 
     private function stripInlineEventHandlers(string $html): string
@@ -96,6 +116,21 @@ final class DefensiveSourceFixes implements Transformer
         ];
 
         return (string) preg_replace(array_keys($patterns), array_values($patterns), $html);
+    }
+
+    /**
+     * Upgrade protocol-relative URLs `//example.com/x` to https://. AMP
+     * accepts both in most contexts, but `<link>` to a font allowlist
+     * member needs an explicit scheme, and runtime injection / external
+     * CSS inlining downstream both look for `https://` prefixes.
+     */
+    private function upgradeProtocolRelativeUrls(string $html): string
+    {
+        return (string) preg_replace(
+            '#(<[^>]+\b(?:href|src|action)=["\'])//#i',
+            '$1https://',
+            $html,
+        );
     }
 
     /**

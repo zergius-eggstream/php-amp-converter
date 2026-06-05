@@ -11,6 +11,7 @@ use AmpConverter\Transformer\BurgerToAmpBind;
 use AmpConverter\Transformer\DefensiveSourceFixes;
 use AmpConverter\Transformer\AmpRuntimeInjection;
 use AmpConverter\Transformer\AutoContrastVars;
+use AmpConverter\Transformer\CssAggregation;
 use AmpConverter\Transformer\FaqToAccordion;
 use AmpConverter\Transformer\FontImportInjection;
 use AmpConverter\Transformer\PurgeCss;
@@ -35,6 +36,7 @@ final class DefaultPipeline
     {
         return [
             new MaskSnippets(),
+            new CssAggregation(),
             // TODO Stage 3:  Transformer/HtmlSkeleton
             // TODO Stage 3:  Transformer/ScriptStripping
             new CssProcessing(),
