@@ -11,7 +11,8 @@ PHP port of the Node-based `convert-rendered-to-amp.js` shipped with the [amp-se
 ## Requirements
 
 - PHP `>=8.4` (will be lowered if no 8.x features end up being required)
-- `ext-libxml`, `ext-mbstring`, `ext-simplexml`, `ext-gd` (raster image dimensions; SVG uses ext-simplexml)
+- `ext-libxml`, `ext-mbstring`, `ext-simplexml`
+- `ext-gd` is **NOT** required at runtime. Raster image dimensions come from `getimagesize()`, which is part of PHP core; SVG parsing uses `ext-simplexml`. GD is only used by the unit tests to generate PNG fixtures, and the affected tests auto-skip when GD is absent. The package works fine on slim production servers that don't have GD loaded — that path is exercised in CI under the `no-gd` matrix entry.
 - **No Node.js** — pure PHP
 
 ## Installation

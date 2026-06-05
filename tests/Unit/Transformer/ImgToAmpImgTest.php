@@ -44,11 +44,20 @@ final class ImgToAmpImgTest extends TestCase
     }
 
     /**
+     * Generate a raster PNG fixture for the test. Uses ext-gd; tests that
+     * hit this helper auto-skip on GD-less PHP installs. The package
+     * itself does NOT require GD at runtime — only this test fixture
+     * generation does (raster dim resolution uses `getimagesize()`, which
+     * is part of PHP core).
+     *
      * @param positive-int $width
      * @param positive-int $height
      */
     private function writeRaster(string $relative, int $width, int $height): void
     {
+        if (!function_exists('imagecreatetruecolor')) {
+            self::markTestSkipped('ext-gd not loaded — raster fixture cannot be generated');
+        }
         $path = $this->siteRoot . '/public/' . ltrim($relative, '/');
         @mkdir(dirname($path), 0777, true);
         $im = imagecreatetruecolor($width, $height);

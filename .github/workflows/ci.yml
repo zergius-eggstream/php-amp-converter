@@ -12,7 +12,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['8.4']
+        include:
+          # Default install with ext-gd present. Used to generate raster
+          # PNG fixtures in the unit tests — the package itself doesn't
+          # need GD at runtime.
+          - php-version: '8.4'
+            extensions: 'libxml, mbstring, simplexml, gd'
+            label: 'with-gd'
+          # Slim production target: no GD. Raster-fixture-dependent tests
+          # auto-skip via markTestSkipped; the rest must still pass. This
+          # job proves the package is GD-free at runtime, which matters
+          # for low-resource servers that can't load the extension.
+          - php-version: '8.4'
+            extensions: 'libxml, mbstring, simplexml'
+            label: 'no-gd'
+    name: test (${{ matrix.php-version }} ${{ matrix.label }})
     steps:
       - uses: actions/checkout@v4
 
@@ -20,7 +34,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          extensions: libxml, mbstring, simplexml, gd
+          extensions: ${{ matrix.extensions }}
           coverage: none
           tools: composer:v2
 

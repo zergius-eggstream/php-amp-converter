@@ -16,7 +16,8 @@
     },
     "suggest": {
         "symfony/http-kernel": "Required to use the bundled Symfony bridge (auto-wiring, config tree, bundle)",
-        "symfony/dependency-injection": "Required to use the bundled Symfony bridge"
+        "symfony/dependency-injection": "Required to use the bundled Symfony bridge",
+        "ext-gd": "Only needed to generate the raster PNG fixtures used by the test suite; the package itself does not call any GD function at runtime"
     },
     "autoload": {
         "psr-4": {
